@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model addresses {
+  id           Int        @id @default(autoincrement())
+  company_id   Int?
+  address_line String     @db.VarChar(255)
+  city         String?    @db.VarChar(100)
+  state        String?    @db.VarChar(100)
+  zip_code     String?    @db.VarChar(20)
+  country      String?    @db.VarChar(100)
+  created_at   DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?  @default(now()) @db.Timestamp(6)
+  companies    companies? @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  requests     requests[]
+}
+
+model companies {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(100)
+  description String?
+  user_id     Int
+  created_at  DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?   @default(now()) @db.Timestamp(6)
+  addresses   addresses[]
+  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model loyalty_points {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  points     Int?      @default(0)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model loyalty_programs {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  description String?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model news {
+  id         Int       @id @default(autoincrement())
+  title      String    @db.VarChar(255)
+  content    String
+  author_id  Int?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users?    @relation(fields: [author_id], references: [id], onUpdate: NoAction)
+}
+
+model push_notifications {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  message    String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  sent       Boolean?  @default(false)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model request_comments {
+  id         Int       @id @default(autoincrement())
+  request_id Int?
+  user_id    Int?
+  comment    String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  requests   requests? @relation(fields: [request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model request_statuses {
+  id          Int        @id @default(autoincrement())
+  status_name String     @unique @db.VarChar(50)
+  description String?
+  requests    requests[]
+}
+
+model requests {
+  id               Int                @id @default(autoincrement())
+  user_id          Int?
+  status_id        Int?
+  address_id       Int?
+  description      String?
+  request_date     DateTime           @db.Date
+  request_time     DateTime           @db.Time(6)
+  created_at       DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamp(6)
+  due_date         DateTime?          @db.Timestamp(6)
+  request_comments request_comments[]
+  addresses        addresses?         @relation(fields: [address_id], references: [id], onUpdate: NoAction)
+  request_statuses request_statuses?  @relation(fields: [status_id], references: [id], onUpdate: NoAction)
+  users            users?             @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+model roles {
+  id          Int          @id @default(autoincrement())
+  role_name   String       @unique @db.VarChar(50)
+  description String?
+  user_roles  user_roles[]
+}
+
+model settings {
+  id            Int     @id @default(autoincrement())
+  setting_key   String  @unique @db.VarChar(100)
+  setting_value String
+  description   String?
+}
+
+model user_roles {
+  user_id     Int
+  role_id     Int
+  description String?
+  roles       roles   @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users       users   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, role_id])
+}
+
+model user_tokens {
+  id             Int       @id @default(autoincrement())
+  user_id        Int?
+  firebase_token String
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @default(now()) @db.Timestamp(6)
+  users          users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model image_types {
+  id          Int      @id @default(autoincrement())
+  type_name   String   @unique @db.VarChar(50) // Например: "паспорт", "аватар" и т.д.
+  description String?
+  images      images[] // Связь с таблицей изображений
+}
+
+model images {
+  id          Int        @id @default(autoincrement())
+  user_id     Int?       // Пользователь, который загрузил изображение
+  type_id     Int        // Тип изображения (связь с таблицей image_types)
+  url         String     @db.VarChar(255) // URL изображения (например, с Cloudinary)
+  uploaded_at DateTime?  @default(now()) @db.Timestamp(6) // Дата загрузки
+  description String?    // Описание (например, для отчётов или других документов)
+  users       users?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  image_types image_types @relation(fields: [type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id                  Int                  @id @default(autoincrement())
+  username            String               @unique @db.VarChar(50)
+  email               String               @unique @db.VarChar(100)
+  password_hash       String               @db.VarChar(255)
+  first_name          String?              @db.VarChar(50)
+  last_name           String?              @db.VarChar(50)
+  date_of_birth       DateTime?            @db.Date
+  phone_number        String?              @db.VarChar(20)
+  profile_picture_url String?              @db.VarChar(255)
+  notify_by_email     Boolean?             @default(true)
+  created_at          DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?            @default(now()) @db.Timestamp(6)
+  last_login          DateTime?            @db.Timestamp(6)
+  is_active           Boolean?             @default(true)
+  is_verified         Boolean?             @default(false)
+  companies           companies[]
+  loyalty_points      loyalty_points[]
+  news                news[]
+  push_notifications  push_notifications[]
+  request_comments    request_comments[]
+  requests            requests[]
+  user_roles          user_roles[]
+  user_tokens         user_tokens[]
+  images              images[] 
+}
+
