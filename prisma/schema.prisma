@@ -2,9 +2,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model addresses {
@@ -22,14 +28,27 @@ model addresses {
 }
 
 model companies {
-  id          Int         @id @default(autoincrement())
-  name        String      @db.VarChar(100)
-  description String?
-  user_id     Int
-  created_at  DateTime?   @default(now()) @db.Timestamp(6)
-  updated_at  DateTime?   @default(now()) @db.Timestamp(6)
-  addresses   addresses[]
-  users       users       @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(100)
+  description     String?
+  director_name   String?           @db.VarChar(100) // Имя директора компании
+  tax_id          String?           @db.VarChar(20) // ИНН компании
+  user_id         Int
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?         @default(now()) @db.Timestamp(6)
+  addresses       addresses[]
+  users           users             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_companies users_companies[]
+}
+
+model users_companies {
+  user_id    Int
+  company_id Int
+  joined_at  DateTime? @default(now()) @db.Timestamp(6) // Когда пользователь присоединился к компании
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  companies  companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([user_id, company_id])
 }
 
 model loyalty_points {
@@ -143,14 +162,27 @@ model image_types {
 }
 
 model images {
-  id          Int        @id @default(autoincrement())
-  user_id     Int?       // Пользователь, который загрузил изображение
-  type_id     Int        // Тип изображения (связь с таблицей image_types)
-  url         String     @db.VarChar(255) // URL изображения (например, с Cloudinary)
-  uploaded_at DateTime?  @default(now()) @db.Timestamp(6) // Дата загрузки
-  description String?    // Описание (например, для отчётов или других документов)
-  users       users?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id          Int         @id @default(autoincrement())
+  user_id     Int? // Пользователь, который загрузил изображение
+  type_id     Int // Тип изображения (связь с таблицей image_types)
+  url         String      @db.VarChar(255) // URL изображения (например, с Cloudinary)
+  uploaded_at DateTime?   @default(now()) @db.Timestamp(6) // Дата загрузки
+  description String? // Описание (например, для отчётов или других документов)
+  users       users?      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   image_types image_types @relation(fields: [type_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model passports {
+  id              Int       @id @default(autoincrement())
+  user_id         Int // Владелец паспорта
+  passport_number String    @unique @db.VarChar(20) // Номер паспорта
+  issue_date      DateTime  @db.Date // Дата выдачи
+  expiry_date     DateTime  @db.Date // Дата окончания действия
+  country         String    @db.VarChar(100) // Страна, выдавшая паспорт
+  issued_by       String    @db.VarChar(255) // Орган, выдавший паспорт
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model users {
@@ -177,6 +209,7 @@ model users {
   requests            requests[]
   user_roles          user_roles[]
   user_tokens         user_tokens[]
-  images              images[] 
+  images              images[]
+  passports           passports[] // Связь с таблицей паспортов
+  users_companies     users_companies[] // Связь с таблицей users_companies
 }
-

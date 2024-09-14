@@ -96,8 +96,8 @@ export default function UploadPage() {
   }, [uploadStatus]);
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-background-white">
-      <div className="bg-background-light-grey p-8 rounded-2xl shadow-2xl w-full max-w-md border-spacing-1">
+    <div className="flex flex-col justify-center items-center min-h-screen ">
+      <div className=" w-full max-w-md">
         <div className="text-center mb-6">
           <h1 className="text-3xl text-current font-bold">
             Загрузка изображения
@@ -120,13 +120,13 @@ export default function UploadPage() {
             </button>
           </div>
           {imagePreview && (
-            <div className="mt-4 text-center">
+            <div className="mt-4 text-center flex justify-center">
               <img
                 src={imagePreview}
                 alt="Image preview"
                 className="max-w-full h-auto rounded-md border border-gray-300"
                 style={{
-                  maxWidth: "100%",
+                  maxWidth: "50%",
                   height: "auto",
                   objectFit: "contain",
                 }}
@@ -141,7 +141,7 @@ export default function UploadPage() {
               type="text"
               value={imageType}
               onChange={handleImageTypeChange}
-              className="mt-2 px-4 py-2 rounded-md bg-current-black text-current-light focus:outline-none focus:ring-2 focus:ring-[#dbc58]"
+              className="mt-2 px-4 py-2 rounded-md bg-current-black text-current-light focus:outline-none focus:ring-2 focus:ring-[#dbc58] border"
             />
           </div>
           <div>
@@ -150,7 +150,7 @@ export default function UploadPage() {
               type="text"
               value={description}
               onChange={handleDescriptionChange}
-              className="mt-2 px-4 py-2 rounded-md bg-current-black text-current-light focus:outline-none focus:ring-2 focus:ring-[#dbc58]"
+              className="mt-2 px-4 py-2 rounded-md bg-current-black text-current-light focus:outline-none focus:ring-2 focus:ring-[#dbc58] border"
             />
           </div>
           <button

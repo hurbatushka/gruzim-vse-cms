@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import {
-  Menu,
-  X,
   LogOut,
   ChartNoAxesCombined,
   User,
@@ -35,11 +33,11 @@ export default function Sidebar() {
   };
 
   return (
-    <header className="h-full shadow-md absolute bg-gray-200">
+    <header className="h-screen shadow-md fixed bg-gray-200">
       <div
         className={`${
           isOpen ? "w-64" : "w-32"
-        } h-screen p-5 pt-8 relative duration-300 ease-in-out shadow-xl`}
+         } h-full p-5 pt-8 relative duration-300 ease-in-out shadow-xl`}
       >
         {/* Кнопка для открытия/закрытия*/}
 
