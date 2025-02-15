@@ -1,3 +1,5 @@
+// components/Sidebar.tsx
+
 "use client";
 import { useState } from "react";
 import {
@@ -6,15 +8,17 @@ import {
   User,
   Settings,
   ArrowRight,
+  Handshake
 } from "lucide-react";
 import Link from "next/link";
 import AnimatedBurger from "@/components/ui/AnimatedBurger";
 
-export default function Sidebar() {
+export default function Sidebar({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Массив с основными ссылками
   const links = [
+    { name: "Клиенты", path: "/clients", icon: Handshake },
     { name: "Статистика", path: "/statistics", icon: ChartNoAxesCombined },
     { name: "Профиль", path: "/profile", icon: User },
     { name: "Настройки", path: "/settings", icon: Settings },
@@ -33,14 +37,13 @@ export default function Sidebar() {
   };
 
   return (
-    <header className="h-screen shadow-md fixed bg-gray-200">
-      <div
+    <div className="grid grid-cols-12 h-screen">
+      <header
         className={`${
-          isOpen ? "w-64" : "w-32"
-         } h-full p-5 pt-8 relative duration-300 ease-in-out shadow-xl`}
+          isOpen ? "col-span-2" : "col-span-1"
+        } h-full p-5 pt-8 relative duration-300 ease-in-out shadow-xl bg-gray-200 transition-all`}
       >
-        {/* Кнопка для открытия/закрытия*/}
-
+        {/* Кнопка для открытия/закрытия */}
         <AnimatedBurger isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
         {/* Логотип */}
@@ -112,7 +115,14 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <main
+        className={`${
+          isOpen ? "col-span-10" : "col-span-11"
+        } p-5 transition-all duration-300 ease-in-out`}
+      >
+        {children}
+      </main>
+    </div>
   );
 }

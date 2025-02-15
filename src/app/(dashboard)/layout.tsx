@@ -12,8 +12,9 @@ export default async function Layout({
   const role = iUser.role;
   return role === 1 ? (
     <>
-      <NavBar />
+      <NavBar>
       {admin}
+      </NavBar>
     </>
   ) : role === 3 ? (
     user

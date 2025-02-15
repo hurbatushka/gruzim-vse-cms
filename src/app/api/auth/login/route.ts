@@ -55,10 +55,10 @@ export async function POST(request: Request) {
       email: user.email,
     },
     SECRET_KEY,
-    { expiresIn: "60m" }
+    { expiresIn: '9999 years'}
   );
 
-  cookieStore.set("Authorization", JSON.stringify({ token }), { maxAge: 6000 });
+  cookieStore.set("Authorization", JSON.stringify({ token }), { expires: new Date(Date.now() + 9999 * 365 * 24 * 60 * 60 * 1000) });
  
   // Обновляем время последнего входа
   await prisma.users.update({ 
